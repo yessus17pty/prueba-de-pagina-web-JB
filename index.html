@@ -1,25 +1,597 @@
 <!DOCTYPE html>
-<html lang="es">
-    <head>
-        <title>Portafolio Digital - Jesus Batista</title>
-        <link rel="stylesheet" href="style.css">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Encrypt · Encryption and multi-hop routing simulation</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%235fd0ff'/%3E%3Cstop offset='55%25' stop-color='%234a7dff'/%3E%3Cstop offset='100%25' stop-color='%239a5cff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='220' height='120' rx='20' fill='%23060912'/%3E%3Cpath d='M78 26 L104 26 Q142 26 142 60 Q142 94 104 94 L78 94 L78 68 L92 68 L92 52 L78 52 Z' fill='none' stroke='url(%23g)' stroke-width='9'/%3E%3Cpath d='M132 32 L166 32 L150 52 L178 52 L138 92' fill='none' stroke='url(%23g)' stroke-width='9'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg: #060912;
+    --bg-2: #0a0e1a;
+    --panel: #0d1220;
+    --panel-2: #0a0e19;
+    --line: #1b2338;
+    --line-strong: #2a3552;
+    --text: #eef1fb;
+    --text-dim: #8b93b3;
+    --text-faint: #545d80;
+    --violet: #7c5cff;
+    --violet-dim: #5b3fd6;
+    --violet-glow: rgba(124,92,255,0.35);
+    --green: #35d996;
+    --green-dim: #1d9e75;
+    --amber: #f2a623;
+    --red: #e2544a;
+    --chip-blue: #3aa0ff;
+    --chip-blue-bg: #10233d;
+    --chip-green-bg: #0e2a22;
+    --chip-violet-bg: #1c1740;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(124,92,255,0.14), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(53,217,150,0.08), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 40px 16px 64px;
+    display:flex;
+    justify-content:center;
+  }
+  .wrap{ width:100%; max-width: 800px; }
 
-    </head>
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, #0c1120 0%, #080b15 100%);
+    border-radius: 20px;
+    padding: 36px 32px 30px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    text-align:center;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(115deg, transparent 0 68px, rgba(124,92,255,0.05) 68px 69px),
+      repeating-linear-gradient(25deg, transparent 0 90px, rgba(53,217,150,0.05) 90px 91px);
+    pointer-events:none;
+  }
+  .bin-scatter{
+    position:absolute; inset:0; pointer-events:none;
+    font-family: var(--mono); font-size:11px; color: rgba(124,92,255,0.35);
+    line-height:1.9; letter-spacing:0.15em; user-select:none;
+    -webkit-mask-image: radial-gradient(ellipse 60% 90% at 50% 40%, transparent 30%, black 90%);
+    mask-image: radial-gradient(ellipse 60% 90% at 50% 40%, transparent 30%, black 90%);
+    overflow:hidden;
+  }
+  .hero-inner{ position:relative; z-index:1; }
+  .brand-logo{ display:flex; justify-content:center; margin-bottom: 4px; }
+  .brand-name{
+    font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    margin: 0 0 10px;
+    background: linear-gradient(100deg, #cfe6ff 0%, #7fb2ff 45%, #b18bff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand-tagline{
+    display:flex; align-items:center; justify-content:center; gap: 8px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 22px;
+  }
+  .tl-dot{ width:6px; height:6px; border-radius:50%; border: 1.5px solid var(--chip-blue); flex:none; }
+  .tl-dot.violet{ border-color: var(--violet); }
+  .tl-line{ height:1px; width: 30px; background: var(--chip-blue); opacity:0.6; flex:none; }
+  .tl-line.violet{ background: var(--violet); }
+  .badge{
+    width: 56px; height:56px; border-radius: 16px;
+    background: linear-gradient(160deg, var(--violet), var(--violet-dim));
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 0 1px rgba(124,92,255,0.4), 0 12px 28px -8px var(--violet-glow);
+  }
+  .badge svg{ width:26px; height:26px; }
+  .hero h1{
+    font-size: 26px; font-weight: 700; margin: 0 0 8px; letter-spacing:-0.01em;
+    color: var(--text);
+  }
+  .hero .sub{
+    font-size: 14px; color: var(--text-dim); margin: 0 auto; max-width: 46ch; line-height:1.6;
+  }
+  .hero .tape{
+    margin-top: 22px; display:flex; justify-content:center; gap: 22px;
+    font-family: var(--mono); font-size: 12px; color: var(--violet);
+    opacity: 0.85; flex-wrap: wrap;
+  }
 
-    <body>
-        <header>
-            <h1>Mi portafolio digital</h1>
-            <nav>
-                <a href="freshmen.html">Freshmen</a>
-                <a href="junior.html">Junior</a>
-                <a href="senior.html">Senior</a>
-            </nav>
-        </header>
+  /* ---------- disclaimer ---------- */
+  .disclaimer{
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height:1.65;
+    margin: 0 0 20px;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .disclaimer .ic{
+    flex:none; width:26px; height:26px; border-radius:8px;
+    background: var(--chip-blue-bg); color: var(--chip-blue);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .disclaimer b{ color: var(--amber); font-weight:600; }
+  .disclaimer code{
+    font-family: var(--mono); background: rgba(255,255,255,0.06);
+    padding: 1px 5px; border-radius: 4px; font-size:11.5px; color: var(--text);
+  }
 
-     <footer>
-        <p>Derechos reservados</p>
+  /* ---------- panel (card) shared ---------- */
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .panel-head{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .step-chip{
+    flex:none; width:30px; height:30px; border-radius: 9px;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--mono); font-size:12px; font-weight:700;
+  }
+  .step-chip.v{ background: var(--chip-violet-bg); color: var(--violet); }
+  .step-chip.g{ background: var(--chip-green-bg); color: var(--green); }
+  .panel-title{ font-size:15px; font-weight:600; color: var(--text); margin:0; }
+  .panel-desc{ font-size:12.5px; color: var(--text-dim); margin: 2px 0 0; }
 
-    </footer>
+  label{ display:block; font-size:11px; color: var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+  .row{ display:flex; gap:10px; }
+  input[type=text]{
+    flex:1;
+    background: var(--panel-2);
+    border: 1px solid var(--line-strong);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    outline:none;
+  }
+  input[type=text]:focus{ border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124,92,255,0.18); }
+  input[type=text]:disabled{ opacity:0.6; }
 
-    </body>
+  button{
+    background: linear-gradient(160deg, var(--violet), var(--violet-dim));
+    color: #fff;
+    border: none;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor:pointer;
+    white-space:nowrap;
+    display:flex; align-items:center; gap:7px;
+    box-shadow: 0 8px 20px -8px var(--violet-glow);
+  }
+  button:hover{ filter:brightness(1.08); }
+  button:disabled{ background: var(--line-strong); color: var(--text-dim); cursor:not-allowed; box-shadow:none; }
+  button svg{ width:15px; height:15px; }
+
+  .field{ margin-top: 16px; }
+  .out-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .mono-out{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height:1.8;
+    color: var(--green);
+    word-break: break-all;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-height: 20px;
+  }
+  .mono-out.dim{ color: var(--text-faint); font-family: var(--sans); font-size:13px; }
+  .mono-out.code{ color: var(--violet); font-size: 15px; letter-spacing: 0.04em; font-weight:600; }
+  .mono-out.code.dim{ color: var(--text-faint); font-weight:400; }
+
+  /* ---------- route ---------- */
+  .route{ position:relative; padding: 26px 0 44px; overflow-x:auto; }
+  .track{ position:relative; min-width: 640px; height: 92px; }
+  .line{
+    position:absolute; top:46px; left:38px; right:38px; height:1px;
+    background: var(--line-strong);
+  }
+  .stops{ position:absolute; top:0; left:0; right:0; height:92px; display:flex; justify-content:space-between; }
+  .stop{ width: 110px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .node-box{
+    width: 100%;
+    border: 1px solid var(--line-strong);
+    background: var(--panel-2);
+    border-radius: 12px;
+    padding: 10px 6px 9px;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+  .node-ic{
+    width:26px; height:26px; border-radius:8px; margin: 0 auto 6px;
+    background: var(--chip-violet-bg); color: var(--violet);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .node-box.origin .node-ic{ background: var(--chip-blue-bg); color: var(--chip-blue); }
+  .node-box.dest .node-ic{ background: var(--chip-green-bg); color: var(--green); }
+  .node-ic svg{ width:13px; height:13px; }
+  .node-box .name{ font-weight:600; color:var(--text); font-size:11.5px; }
+  .node-box .role{ color: var(--text-faint); font-size:10px; margin-top:2px; font-family: var(--mono); }
+  .node-box.active{
+    border-color: var(--violet);
+    background: var(--chip-violet-bg);
+    box-shadow: 0 0 0 3px rgba(124,92,255,0.15);
+  }
+  .node-box.dest.active{ border-color: var(--green); background: var(--chip-green-bg); box-shadow: 0 0 0 3px rgba(53,217,150,0.15); }
+
+  .packet{
+    position:absolute; top:41px; width:12px; height:12px;
+    border-radius:50%;
+    background: var(--green);
+    box-shadow: 0 0 12px 2px rgba(53,217,150,0.65);
+    opacity:0;
+    transform: translateX(-50%);
+  }
+
+  .status{ font-size: 12.5px; color: var(--text-dim); min-height: 18px; padding-left: 2px; font-family: var(--mono); }
+  .status.active{ color: var(--violet); }
+
+  .log-title-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  table{ width:100%; border-collapse: collapse; font-size:12px; }
+  th{
+    text-align:left; color: var(--text-faint); font-weight:600;
+    border-bottom: 1px solid var(--line); padding: 6px 8px;
+    font-size: 10px; text-transform:uppercase; letter-spacing:0.06em;
+  }
+  td{ padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-family: var(--mono); }
+  tr:last-child td{ border-bottom:none; }
+  td.hop{ color: var(--text-faint); white-space:nowrap; }
+  td.code{ color: var(--green); font-weight:600; letter-spacing: 0.03em; }
+  td.code.new{ color: var(--amber); }
+  .empty-row td{ color: var(--text-faint); font-style: normal; font-family: var(--sans); }
+
+  footer{
+    margin-top: 26px; font-size: 12px; color: var(--text-faint); line-height:1.7;
+    text-align:center; padding: 0 20px;
+  }
+  footer .foot-badge{
+    width:40px; height:40px; border-radius:12px; margin: 0 auto 10px;
+    background: var(--chip-violet-bg); color: var(--violet);
+    display:flex; align-items:center; justify-content:center;
+  }
+  footer .foot-badge svg{ width:18px; height:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="bin-scatter" id="binScatter"></div>
+    <div class="hero-inner">
+      <div class="brand-logo">
+        <svg viewBox="0 0 240 130" width="192" height="104" role="img" aria-label="Data Encrypt DS logo">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#5fd0ff"/>
+              <stop offset="55%" stop-color="#4a7dff"/>
+              <stop offset="100%" stop-color="#9a5cff"/>
+            </linearGradient>
+            <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g opacity="0.85">
+            <rect x="10" y="52" width="7" height="7" rx="1.5" fill="#3a5fff" opacity="0.35"/>
+            <rect x="22" y="60" width="7" height="7" rx="1.5" fill="#4a7dff" opacity="0.55"/>
+            <rect x="20" y="44" width="8" height="8" rx="1.5" fill="#5fd0ff" opacity="0.7"/>
+            <rect x="34" y="52" width="9" height="9" rx="1.5" fill="#5fd0ff" opacity="0.85"/>
+            <rect x="36" y="34" width="9" height="9" rx="1.5" fill="#7fe0ff"/>
+          </g>
+          <g filter="url(#logoGlow)" fill="none" stroke="url(#logoGrad)" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M62 20
+                     L100 20
+                     Q140 20 140 65
+                     Q140 110 100 110
+                     L62 110
+                     L62 78
+                     L78 78
+                     L78 52
+                     L62 52
+                     Z"/>
+            <path d="M212 34
+                     Q212 20 194 20
+                     Q170 20 170 38
+                     Q170 54 194 58
+                     Q218 62 218 80
+                     Q218 100 192 100
+                     Q170 100 168 84"/>
+          </g>
+          <text x="100" y="67" text-anchor="middle" dominant-baseline="central"
+                font-family="var(--mono)" font-size="17" font-weight="700" fill="#dff3ff" filter="url(#logoGlow)">&lt;/&gt;</text>
+        </svg>
+      </div>
+      <p class="brand-name">Data Encrypt</p>
+      <div class="brand-tagline">
+        <span class="tl-dot"></span><span class="tl-line blue"></span>
+        <span>data that encrypts the future</span>
+        <span class="tl-line violet"></span><span class="tl-dot violet"></span>
+      </div>
+      <h1>Encryption and multi-hop routing</h1>
+      <p class="sub">Write a message and watch it get converted to binary, assigned a session code, and see that code change at every server it passes through before reaching the destination.</p>
+      <div class="tape"><span>01001000</span><span>01101111</span><span>01101100</span><span>01100001</span></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <div class="ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div>
+      <b>This is a conceptual demo, not real security software.</b> Converting text to binary isn't encryption — it's reversible without any key, and just represents the text as bytes. The session code and its rotation at each node illustrate the idea of layered routing (similar in spirit to Tor), but here they're generated with <code>Math.random()</code> in the browser, with no real cryptography involved. Don't use this to protect sensitive information.
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="step-chip v">1</div>
+      <div>
+        <p class="panel-title">Original message</p>
+        <p class="panel-desc">Type the text you want to send through the simulated network.</p>
+      </div>
+    </div>
+    <label for="msgInput">Text</label>
+    <div class="row">
+      <input id="msgInput" type="text" value="hello world" maxlength="28" autocomplete="off" />
+      <button id="sendBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Encrypt and send
+      </button>
+    </div>
+
+    <div class="field">
+      <div class="out-head"><label style="margin:0;">Generated binary</label></div>
+      <div id="binOut" class="mono-out dim">waiting to send…</div>
+    </div>
+
+    <div class="field">
+      <div class="out-head"><label style="margin:0;">Current session code</label></div>
+      <div id="codeOut" class="mono-out code dim">—</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div class="step-chip g">2</div>
+      <div>
+        <p class="panel-title">Route through intermediate servers</p>
+        <p class="panel-desc">Each node forwards the packet and rotates the code before passing it to the next one.</p>
+      </div>
+    </div>
+    <div class="route">
+      <div class="track" id="track">
+        <div class="line"></div>
+        <div class="stops" id="stops"></div>
+        <div class="packet" id="packet"></div>
+      </div>
+    </div>
+    <div class="status" id="statusLine">Ready to send.</div>
+  </div>
+
+  <div class="panel log">
+    <div class="log-title-row">
+      <div class="panel-head" style="margin:0;">
+        <div class="step-chip v">3</div>
+        <div>
+          <p class="panel-title">Hop log</p>
+          <p class="panel-desc">History of how the code changes at each node.</p>
+        </div>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr><th>Hop</th><th>Node</th><th>Session code</th></tr>
+      </thead>
+      <tbody id="logBody">
+        <tr class="empty-row"><td colspan="3">No hops recorded yet.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <div class="foot-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    Each intermediate server only knows the previous and next node, never the origin and destination at the same time — and here, each one also rotates the session code before forwarding it.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const scatter = document.getElementById('binScatter');
+  let scatterText = '';
+  for(let i=0;i<9;i++){
+    let line = '';
+    for(let j=0;j<40;j++) line += Math.round(Math.random());
+    scatterText += line + '\n';
+  }
+  scatter.textContent = scatterText;
+
+  const nodeIcons = {
+    origin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>',
+    relay: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>',
+    dest: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>'
+  };
+
+  const nodes = [
+    { name: 'Origin', role: 'your device', cls: 'origin', icon: nodeIcons.origin },
+    { name: 'Node 1', role: 'relay', cls: '', icon: nodeIcons.relay },
+    { name: 'Node 2', role: 'relay', cls: '', icon: nodeIcons.relay },
+    { name: 'Node 3', role: 'relay', cls: '', icon: nodeIcons.relay },
+    { name: 'Destination', role: 'receiver', cls: 'dest', icon: nodeIcons.dest },
+  ];
+
+  const stopsEl = document.getElementById('stops');
+  const packet = document.getElementById('packet');
+  const track = document.getElementById('track');
+  const binOut = document.getElementById('binOut');
+  const codeOut = document.getElementById('codeOut');
+  const statusLine = document.getElementById('statusLine');
+  const logBody = document.getElementById('logBody');
+  const sendBtn = document.getElementById('sendBtn');
+  const msgInput = document.getElementById('msgInput');
+
+  const nodeEls = [];
+  nodes.forEach((n) => {
+    const stop = document.createElement('div');
+    stop.className = 'stop';
+    stop.innerHTML =
+      '<div class="node-box ' + n.cls + '">' +
+        '<div class="node-ic">' + n.icon + '</div>' +
+        '<div class="name">' + n.name + '</div>' +
+        '<div class="role">' + n.role + '</div>' +
+      '</div>';
+    stopsEl.appendChild(stop);
+    nodeEls.push(stop.querySelector('.node-box'));
+  });
+
+  function toBinary(str){
+    return str.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+  }
+
+  function randomCode(){
+    const chars = 'ABCDEF0123456789';
+    let out = '';
+    for(let i=0;i<8;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out.slice(0,4) + '-' + out.slice(4);
+  }
+
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  function getStopX(index){
+    const stopEls = stopsEl.children;
+    const el = stopEls[index].querySelector('.node-box');
+    const trackRect = track.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    return (elRect.left + elRect.width/2) - trackRect.left;
+  }
+
+  function animateMove(fromX, toX, duration){
+    return new Promise(resolve => {
+      const start = performance.now();
+      function step(now){
+        const t = Math.min(1, (now - start) / duration);
+        const eased = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+        packet.style.left = (fromX + (toX-fromX)*eased) + 'px';
+        if(t < 1) requestAnimationFrame(step);
+        else resolve();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  function addLogRow(hopLabel, nodeName, code, isNew){
+    if(logBody.querySelector('.empty-row')) logBody.innerHTML = '';
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="hop">' + hopLabel + '</td>' +
+      '<td style="font-family: var(--sans); color: var(--text);">' + nodeName + '</td>' +
+      '<td class="code' + (isNew ? ' new' : '') + '">' + code + '</td>';
+    logBody.appendChild(tr);
+  }
+
+  async function runSimulation(){
+    sendBtn.disabled = true;
+    msgInput.disabled = true;
+
+    const msg = (msgInput.value || 'hello').slice(0, 28);
+    const bin = toBinary(msg);
+
+    binOut.textContent = 'waiting to send…';
+    binOut.classList.add('dim');
+    codeOut.textContent = '—';
+    codeOut.classList.add('dim');
+    statusLine.textContent = 'Encrypting message…';
+    statusLine.classList.add('active');
+    logBody.innerHTML = '<tr class="empty-row"><td colspan="3">No hops recorded yet.</td></tr>';
+    nodeEls.forEach(el => el.classList.remove('active'));
+
+    await sleep(450);
+    binOut.textContent = bin;
+    binOut.classList.remove('dim');
+
+    let code = randomCode();
+    codeOut.textContent = code;
+    codeOut.classList.remove('dim');
+    addLogRow('hop 0', 'Origin (your device)', code, false);
+    await sleep(500);
+
+    const originX = getStopX(0);
+    packet.style.left = originX + 'px';
+    packet.style.opacity = '1';
+    nodeEls[0].classList.add('active');
+
+    for(let i = 0; i < nodes.length - 1; i++){
+      const fromNode = nodes[i];
+      const toNode = nodes[i+1];
+      const isLastHop = (i === nodes.length - 2);
+
+      statusLine.textContent = 'Hopping from ' + fromNode.name + ' to ' + toNode.name + '…';
+
+      const fromX = getStopX(i);
+      const toX = getStopX(i+1);
+      await animateMove(fromX, toX, 750);
+
+      nodeEls[i].classList.remove('active');
+      nodeEls[i+1].classList.add('active');
+
+      if(!isLastHop){
+        const newCode = randomCode();
+        code = newCode;
+        codeOut.textContent = code;
+        addLogRow('hop ' + (i+1), toNode.name + ' (rotates the code)', code, true);
+        statusLine.textContent = toNode.name + ' forwards the packet without seeing the original message, and assigns a new session code.';
+        await sleep(550);
+      } else {
+        addLogRow('hop ' + (i+1), toNode.name + ' (final receiver)', code, false);
+      }
+    }
+
+    statusLine.textContent = 'The destination decrypts with the final code (' + code + ') → recovered message: "' + msg + '"';
+    statusLine.classList.remove('active');
+    await sleep(300);
+    packet.style.opacity = '0';
+
+    sendBtn.disabled = false;
+    msgInput.disabled = false;
+  }
+
+  sendBtn.addEventListener('click', runSimulation);
+  msgInput.addEventListener('keydown', e => { if(e.key === 'Enter') runSimulation(); });
+  window.addEventListener('resize', () => {
+    if(packet.style.opacity === '1'){
+      packet.style.opacity = '0';
+    }
+  });
+})();
+</script>
+</body>
 </html>
